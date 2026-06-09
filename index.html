@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Circuit Simulation Portfolio (ngspice)</title>
+<style>
+  :root { --ink:#1b1f24; --muted:#5a636e; --line:#e3e6ea; --accent:#1f6feb; --bg:#fbfbfa; }
+  * { box-sizing: border-box; }
+  body {
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 56px 22px 80px; }
+  header h1 { font-size: 1.9rem; margin: 0 0 6px; letter-spacing: -0.01em; }
+  header .sub { color: var(--muted); font-size: 1.02rem; margin: 0 0 22px; }
+  .lede { font-size: 1.05rem; color: #2b3138; max-width: 760px; }
+  .lede p { margin: 0 0 14px; }
+  .projects { margin-top: 40px; display: grid; gap: 34px; }
+  .card {
+    border: 1px solid var(--line); border-radius: 12px; background: #fff;
+    padding: 26px 26px 28px; box-shadow: 0 1px 2px rgba(20,22,26,.04);
+  }
+  .card h2 { font-size: 1.32rem; margin: 0 0 4px; }
+  .card .tag { color: var(--accent); font-weight: 600; font-size: .82rem; text-transform: uppercase; letter-spacing: .06em; }
+  .card p { color: #2b3138; margin: 12px 0; }
+  .figs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0 8px; }
+  .figs figure { margin: 0; }
+  .figs img { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; background:#fff; }
+  .figs figcaption { color: var(--muted); font-size: .82rem; margin-top: 6px; }
+  .results { color: var(--muted); font-size: .92rem; border-top: 1px solid var(--line); margin-top: 16px; padding-top: 14px; }
+  .results b { color: var(--ink); font-weight: 600; }
+  .repo-link { display: inline-block; margin-top: 16px; color: var(--accent); text-decoration: none; font-weight: 600; }
+  .repo-link:hover { text-decoration: underline; }
+  footer { margin-top: 52px; color: var(--muted); font-size: .9rem; border-top: 1px solid var(--line); padding-top: 20px; }
+  @media (max-width: 620px) { .figs { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Circuit Simulation Portfolio</h1>
+    <p class="sub">Sakthi Chandramohan · ngspice</p>
+  </header>
+
+  <div class="lede">
+    <p>These two projects are worked through the way a circuit actually gets designed, which is to say that the netlist is written, the simulation is run, the resulting plots are read, and the next decision is taken from what those plots show. The compensator of the converter was tuned by reading its loop-gain Bode plot until the phase margin was adequate, the bias of the amplifier was set by watching its quiescent current and its distortion spectrum, and in both cases the figures below are the same ones used to make the engineering choices rather than decoration added afterward.</p>
+    <p>Everything here is built directly from ngspice netlists and rebuilds from source with a single command, so the analysis and its results stay reproducible from text.</p>
+  </div>
+
+  <div class="projects">
+
+    <section class="card">
+      <span class="tag">Power electronics</span>
+      <h2>Synchronous Buck Converter</h2>
+      <p>A 12 V to 3.3 V, 5 A synchronous buck converter switching at 500 kHz, designed under voltage-mode control with a Type III compensator. An averaged model is used to measure the loop gain by Middlebrook voltage injection, a switching model is used for the soft-start and the load-step transient, and a Monte Carlo study confirms that the loop stays stable across the spread of real component tolerances.</p>
+      <div class="figs">
+        <figure>
+          <img src="assets/buck_bode.png" alt="Loop gain Bode plot">
+          <figcaption>Loop gain: 49 kHz crossover, 42° phase margin.</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/buck_loadstep.png" alt="Load step response">
+          <figcaption>Load step, 2.5 A to 5 A, about 80 mV droop.</figcaption>
+        </figure>
+      </div>
+      <p class="results"><b>Results:</b> crossover 49.3 kHz, phase margin 42°, peak efficiency 98%, worst-case phase margin 37° over 300 Monte Carlo trials.</p>
+      <a class="repo-link" href="https://github.com/shakc04/buck-converter-design">View the repository and full write-up &rarr;</a>
+    </section>
+
+    <section class="card">
+      <span class="tag">Analog / audio</span>
+      <h2>Discrete Class-AB Power Amplifier</h2>
+      <p>A discrete complementary Class-AB output stage running inside a feedback loop, biased by a Vbe multiplier and built from Darlington pairs so the drive is never starved at high output. The amplifier is characterized the way a power stage is characterized before it is built, through its quiescent current, its frequency response, its harmonic distortion against level, its slew rate, the thermal behavior of its bias, and its output impedance. The distortion spectrum is computed from the simulated waveform by a discrete Fourier transform.</p>
+      <div class="figs">
+        <figure>
+          <img src="assets/amp_thd_power.png" alt="THD versus output power">
+          <figcaption>THD versus power: flat near 0.002% to clipping at 21 W.</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/amp_spectrum.png" alt="Output spectrum at 1 W">
+          <figcaption>Output spectrum at 1 W, low-order harmonics dominant.</figcaption>
+        </figure>
+      </div>
+      <p class="results"><b>Results:</b> gain 23, bandwidth 410 kHz, THD 0.0024% at 1 W, slew rate 2.4 V/µs, output impedance 1.6 mΩ (damping factor about 4900).</p>
+      <a class="repo-link" href="https://github.com/shakc04/class-ab-amplifier">View the repository and full write-up &rarr;</a>
+    </section>
+
+  </div>
+
+  <footer>
+    Simulated with ngspice 46. Figures rendered from the ngspice output with Python, numpy, and matplotlib. Both repositories rebuild every result from the netlists with <code>./run_all.sh</code>.
+  </footer>
+</div>
+</body>
+</html>
